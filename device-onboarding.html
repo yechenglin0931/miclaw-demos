@@ -12,6 +12,7 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  @keyframes popoverIn { from { opacity: 0; transform: translateY(-6px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
   @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
   @keyframes shake { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
   .animate-fade-in { animation: fadeIn 0.4s ease-out; }
@@ -78,7 +79,7 @@
         <span class="text-base text-black/80">助手</span>
       </div>
       <div id="sidebar-group-chat" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/[0.06] cursor-pointer">
-        <span class="text-lg">👥</span><span class="text-base text-black/80">设备群聊</span>
+        <span class="text-lg">🔗</span><span class="text-base text-black/80">设备互联</span>
         <span class="ml-auto size-5 rounded-full bg-[#FF3B30] text-white text-[11px] flex items-center justify-center font-medium" id="unread-badge">1</span>
       </div>
       <div class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-black/[0.03] cursor-pointer transition-colors">
@@ -95,12 +96,73 @@
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 relative z-30">
       <div class="flex items-center gap-3">
-        <h1 class="text-[22px] font-semibold text-black">设备群聊</h1>
+        <h1 class="text-[22px] font-semibold text-black">设备互联</h1>
         <span class="text-[13px] text-black/30" id="member-count">3 个设备</span>
+        <div class="monitor-badge">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          监控模式
+        </div>
       </div>
-      <div class="monitor-badge">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        监控模式 · 只读
+      <button id="agent-status-btn" class="flex items-center gap-2 text-[13px] text-black/40 hover:text-black/60 transition-colors cursor-pointer rounded-lg px-2.5 py-1.5 hover:bg-black/[0.04]">
+        <span class="size-2 rounded-full bg-[#35C759]"></span>
+        <span id="online-count">3 个设备 Bot 在线</span>
+        <svg class="size-3 text-black/30 transition-transform duration-200" id="agent-chevron" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Agent Popover -->
+    <div id="agent-popover" class="absolute right-6 top-[56px] z-50 w-[320px] hidden">
+      <div class="glass rounded-2xl border border-white/60 shadow-[0_8px_40px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden" style="animation: popoverIn 0.25s cubic-bezier(0.16,1,0.3,1) forwards;">
+        <div class="px-4 pt-4 pb-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-black/40 uppercase tracking-wider">Device Bots</span>
+            <span class="text-[11px] text-black/30" id="popover-count">3 / 3 在线</span>
+          </div>
+        </div>
+        <div id="popover-list" class="px-2 pb-2 flex flex-col gap-0.5 max-h-[420px] overflow-y-auto scrollbar-thin">
+          <!-- PC -->
+          <div class="rounded-xl transition-colors">
+            <div class="flex items-start gap-3 px-3 py-3">
+              <div class="shrink-0 size-9 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-base shadow-sm mt-0.5">💻</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="size-[6px] rounded-full bg-[#35C759] shrink-0"></span>
+                  <span class="text-[13px] font-medium text-black/80">MiClaw-PC</span>
+                  <span class="text-[10px] text-black/30 border border-black/10 rounded px-1.5 leading-[18px]">重算力</span>
+                </div>
+                <div class="mt-1.5 text-[12px] text-black/40 leading-tight">在线 · 空闲中</div>
+              </div>
+            </div>
+          </div>
+          <!-- Phone -->
+          <div class="rounded-xl transition-colors">
+            <div class="flex items-start gap-3 px-3 py-3">
+              <div class="shrink-0 size-9 rounded-full bg-gradient-to-br from-[#06b6d4] to-[#10b981] flex items-center justify-center text-base shadow-sm mt-0.5">📱</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="size-[6px] rounded-full bg-[#35C759] shrink-0"></span>
+                  <span class="text-[13px] font-medium text-black/80">MiClaw-Phone</span>
+                  <span class="text-[10px] text-black/30 border border-black/10 rounded px-1.5 leading-[18px]">相册/传感器</span>
+                </div>
+                <div class="mt-1.5 text-[12px] text-black/40 leading-tight">在线 · 空闲中</div>
+              </div>
+            </div>
+          </div>
+          <!-- Pad -->
+          <div class="rounded-xl transition-colors">
+            <div class="flex items-start gap-3 px-3 py-3">
+              <div class="shrink-0 size-9 rounded-full bg-gradient-to-br from-[#ec4899] to-[#a855f7] flex items-center justify-center text-base shadow-sm mt-0.5">📋</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="size-[6px] rounded-full bg-[#35C759] shrink-0"></span>
+                  <span class="text-[13px] font-medium text-black/80">MiClaw-Pad</span>
+                  <span class="text-[10px] text-black/30 border border-black/10 rounded px-1.5 leading-[18px]">手写笔/大屏</span>
+                </div>
+                <div class="mt-1.5 text-[12px] text-black/40 leading-tight">在线 · 空闲中</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -123,13 +185,55 @@
 const chatMessages = document.getElementById('chat-messages');
 const memberCount = document.getElementById('member-count');
 const unreadBadge = document.getElementById('unread-badge');
+const agentBtn = document.getElementById('agent-status-btn');
+const agentPopover = document.getElementById('agent-popover');
+const agentChevron = document.getElementById('agent-chevron');
+const onlineCount = document.getElementById('online-count');
+const popoverCount = document.getElementById('popover-count');
+const popoverList = document.getElementById('popover-list');
+
+// --- Popover toggle ---
+let popoverOpen = false;
+agentBtn.addEventListener('click', function(e) {
+  e.stopPropagation();
+  popoverOpen = !popoverOpen;
+  agentPopover.classList.toggle('hidden', !popoverOpen);
+  agentChevron.style.transform = popoverOpen ? 'rotate(180deg)' : '';
+});
+document.addEventListener('click', function(e) {
+  if (popoverOpen && !agentPopover.contains(e.target) && !agentBtn.contains(e.target)) {
+    popoverOpen = false;
+    agentPopover.classList.add('hidden');
+    agentChevron.style.transform = '';
+  }
+});
+
+// Add car to popover when it joins
+function addCarToPopover() {
+  onlineCount.textContent = '4 个设备 Bot 在线';
+  popoverCount.textContent = '4 / 4 在线';
+  var carRow = document.createElement('div');
+  carRow.className = 'rounded-xl transition-colors animate-fade-in';
+  carRow.innerHTML = '<div class="flex items-start gap-3 px-3 py-3">'
+    + '<div class="shrink-0 size-9 rounded-full bg-gradient-to-br from-[#f59e0b] to-[#ef4444] flex items-center justify-center text-base shadow-sm mt-0.5">🚗</div>'
+    + '<div class="flex-1 min-w-0">'
+    + '<div class="flex items-center gap-2">'
+    + '<span class="size-[6px] rounded-full bg-[#35C759] shrink-0"></span>'
+    + '<span class="text-[13px] font-medium text-black/80">MiClaw-Car</span>'
+    + '<span class="text-[10px] text-black/30 border border-black/10 rounded px-1.5 leading-[18px]">导航/车控</span>'
+    + '<span class="text-[10px] text-[#f59e0b] bg-[#f59e0b]/10 rounded px-1.5 leading-[18px]">新加入</span>'
+    + '</div>'
+    + '<div class="mt-1.5 text-[12px] text-black/40 leading-tight">在线 · 刚刚加入</div>'
+    + '</div></div>';
+  popoverList.appendChild(carRow);
+}
 
 // --- Avatars & names ---
 const bots = {
   pc:    { emoji: '💻', name: 'MiClaw-PC',    gradient: 'from-[#6366f1] to-[#8b5cf6]' },
   phone: { emoji: '📱', name: 'MiClaw-Phone',  gradient: 'from-[#06b6d4] to-[#10b981]' },
   pad:   { emoji: '📋', name: 'MiClaw-Pad',    gradient: 'from-[#ec4899] to-[#a855f7]' },
-  car:   { emoji: '🚗', name: 'SU7',           gradient: 'from-[#f59e0b] to-[#ef4444]' }
+  car:   { emoji: '🚗', name: 'MiClaw-Car',    gradient: 'from-[#f59e0b] to-[#ef4444]' }
 };
 
 function avatarHtml(type) {
@@ -191,12 +295,13 @@ var steps = [
   { delay: 2000, render: function() {
     memberCount.textContent = '4 个设备';
     unreadBadge.textContent = '2';
-    return systemNotice('🚗 SU7 加入了群聊');
+    addCarToPopover();
+    return systemNotice('🚗 MiClaw-Car 加入了群聊');
   }},
 
   // Car says hello
   { delay: 3500, render: function() {
-    return botBubble('car', '大家好呀～我是新来的小米 SU7 🚗 刚刚完成配对，以后请多多关照！有什么需要跑腿的活儿尽管叫我哈 😎');
+    return botBubble('car', '大家好呀～我是新来的 MiClaw-Car 🚗 刚刚完成配对，以后请多多关照！有什么需要跑腿的活儿尽管叫我哈 😎');
   }},
 
   // Likes from PC, Phone, Pad
